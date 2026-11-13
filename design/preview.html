@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FountHW ” UI concept preview</title>
+<link rel="stylesheet" href="preview.css" />
+</head>
+<body>
+
+<div class="preview-bar">
+  <strong>FountHW ” UI concept</strong>
+  <button class="pv-btn on" data-screen="auth" onclick="show('auth')">Sign in</button>
+  <button class="pv-btn" data-screen="student" onclick="show('student')">Student</button>
+  <button class="pv-btn" data-screen="teacher" onclick="show('teacher')">Teacher</button>
+  <button class="pv-btn" data-screen="admin" onclick="show('admin')">Admin</button>
+  <button class="pv-btn" onclick="toggleTheme()" id="themeBtn">Dark</button>
+  <span class="hint">Click around ” this is a static mockup, not wired to the app</span>
+</div>
+
+<!-- ===================== AUTH ===================== -->
+<section class="screen on" id="s-auth">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-mark">F</div>
+        <span>FountHW</span>
+      </div>
+      <div class="segment">
+        <button class="on">Student</button>
+        <button>Teacher</button>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="input" placeholder="you@school.edu" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="input" type="password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" style="width:100%">Sign in</button>
+      <div class="auth-foot">No account yet? <b>Create one</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STUDENT ===================== -->
+<section class="screen" id="s-student">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">F</div> FountHW</div>
+      <div class="nav-label">Class</div>
+      <div class="nav-item on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Homework</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>Announcements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Grades</div>
+      <div class="side-foot">
+        <div class="row" style="border:none;padding:0">
+          <div class="avatar">AK</div>
+          <div class="row-main">
+            <div class="row-title" style="font-size:13.5px">Ali Karimov</div>
+            <div class="row-meta">Group A</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="page-title">English Level 5</div>
+          <div class="page-sub">Good afternoon, Ali. 2 tasks due this week.</div>
+        </div>
+        <div class="head-actions">
+          <span class="chip accent dot">Group A</span>
+        </div>
+      </div>
+
+      <div class="grid grid-4" style="margin-bottom:18px">
+        <div class="stat accent">
+          <div class="stat-label">To do</div>
+          <div class="stat-value">2</div>
+          <div class="stat-note">of 4 assignments</div>
+        </div>
+        <div class="stat green">
+          <div class="stat-label">Done</div>
+          <div class="stat-value">2</div>
+          <div class="stat-note">this week</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Average</div>
+          <div class="stat-value">13.4</div>
+          <div class="stat-note">out of 15</div>
+        </div>
+        <div class="stat amber">
+          <div class="stat-label">Next due</div>
+          <div class="stat-value">2d</div>
+          <div class="stat-note">Essay: "The Great Escape"</div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-bottom:18px">
+        <b>System notification</b>
+        Bring your notebooks on Thursday ” we start Unit 7.
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Homework</div>
+              <div class="card-sub">Only what is for your group</div>
+            </div>
+            <div class="chip">2 pending</div>
+          </div>
+          <div class="list">
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Write an essay: "The Great Escape"</div>
+                <div class="row-meta">Due Friday · 15 points · pages 42—44</div>
+                <div class="row-badges">
+                  <span class="group-tag a">Group A + B</span>
+                  <span class="chip amber dot">Not done</span>
+                </div>
+              </div>
+              <div class="row-actions">
+                <button class="btn btn-ghost btn-sm">Mark done</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Vocabulary test: Unit 6</div>
+                <div class="row-meta">Due Monday · 10 points</div>
+                <div class="row-badges">
+                  <span class="group-tag a">Group A</span>
+                  <span class="chip amber dot">Not done</span>
+                </div>
+              </div>
+              <div class="row-actions">
+                <button class="btn btn-ghost btn-sm">Mark done</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Reading: "The Old Man and the Sea"</div>
+                <div class="row-meta">Submitted Tuesday · 15 points</div>
+                <div class="row-badges">
+                  <span class="group-tag">Everyone</span>
+                  <span class="chip green dot">Graded 13/15</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Announcements</div>
+              <div class="card-sub">From your teacher</div>
+            </div>
+          </div>
+          <div class="list">
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Exam on Friday</div>
+                <div class="row-meta">Unit 6 + 7 · 20 Oct</div>
+                <div class="row-badges"><span class="group-tag a">Group A</span></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">New library books arrived</div>
+                <div class="row-meta">Check the shelf · 18 Oct</div>
+                <div class="row-badges"><span class="group-tag">Everyone</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="nav-item on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Homework</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>News</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Grades</div>
+    </nav>
+  </div>
+</section>
+
+<!-- ===================== TEACHER ===================== -->
+<section class="screen" id="s-teacher">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">F</div> FountHW</div>
+      <div class="nav-label">Manage</div>
+      <div class="nav-item on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Homework</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>Announcements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11h4M19 9v4"/></svg>Groups</div>
+      <div class="side-foot">
+        <div class="row" style="border:none;padding:0">
+          <div class="avatar">MS</div>
+          <div class="row-main">
+            <div class="row-title" style="font-size:13.5px">Ms. Sokolova</div>
+            <div class="row-meta">English Level 5</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="page-title">English Level 5</div>
+          <div class="page-sub">Thursday, 21 October · 2 submissions waiting</div>
+        </div>
+        <div class="head-actions">
+          <button class="btn btn-ghost btn-sm">Class PIN</button>
+          <button class="btn btn-primary">+ New homework</button>
+        </div>
+      </div>
+
+      <div class="pinbox" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="text-align:left">
+          <div class="stat-label" style="margin-bottom:5px">Class PIN ” share with students</div>
+          <div class="pin">482913</div>
+        </div>
+        <div class="chip green dot">3 students · 2 groups</div>
+      </div>
+
+      <div class="grid grid-4" style="margin-bottom:18px">
+        <div class="stat">
+          <div class="stat-label">Homework</div>
+          <div class="stat-value">4</div>
+          <div class="stat-note">2 active</div>
+        </div>
+        <div class="stat amber">
+          <div class="stat-label">To grade</div>
+          <div class="stat-value">2</div>
+          <div class="stat-note">Group A · Group B</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Students</div>
+          <div class="stat-value">3</div>
+          <div class="stat-note">2 groups</div>
+        </div>
+        <div class="stat green">
+          <div class="stat-label">Class average</div>
+          <div class="stat-value">13.1</div>
+          <div class="stat-note">out of 15</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab on">Homework</div>
+        <div class="tab">Submissions</div>
+        <div class="tab">Groups</div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Active homework</div>
+              <div class="card-sub">Tap to grade</div>
+            </div>
+          </div>
+          <div class="list">
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Write an essay: "The Great Escape"</div>
+                <div class="row-meta">Due Friday · 15 points</div>
+                <div class="row-badges">
+                  <span class="group-tag a">Group A + B</span>
+                  <span class="chip amber dot">2 to grade</span>
+                </div>
+              </div>
+              <div class="row-actions"><button class="btn btn-ghost btn-sm">Grade</button></div>
+            </div>
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">Vocabulary test: Unit 6</div>
+                <div class="row-meta">Due Monday · 10 points</div>
+                <div class="row-badges">
+                  <span class="group-tag b">Group B</span>
+                  <span class="chip green dot">1 to grade</span>
+                </div>
+              </div>
+              <div class="row-actions"><button class="btn btn-ghost btn-sm">Grade</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Groups</div>
+              <div class="card-sub">Split your class</div>
+            </div>
+            <button class="btn btn-ghost btn-sm">+ New group</button>
+          </div>
+          <div class="list">
+            <div class="row">
+              <div class="avatar" style="background:var(--accent-soft)">A</div>
+              <div class="row-main">
+                <div class="row-title">Group A</div>
+                <div class="row-meta">Ali Karimov, Jasur Karimov</div>
+                <div class="progress" style="margin-top:7px"><i style="width:67%"></i></div>
+              </div>
+              <div class="row-actions"><span class="chip">2</span></div>
+            </div>
+            <div class="row">
+              <div class="avatar" style="background:var(--green-soft);color:var(--green)">B</div>
+              <div class="row-main">
+                <div class="row-title">Group B</div>
+                <div class="row-meta">Nodir Aliyev</div>
+                <div class="progress" style="margin-top:7px"><i style="width:33%;background:var(--green)"></i></div>
+              </div>
+              <div class="row-actions"><span class="chip">1</span></div>
+            </div>
+            <div class="row">
+              <div class="avatar" style="background:var(--amber-soft);color:var(--amber)">?</div>
+              <div class="row-main">
+                <div class="row-title">Unassigned</div>
+                <div class="row-meta">Put every student in a group to target homework precisely</div>
+              </div>
+              <div class="row-actions"><span class="chip amber">1</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">New homework</div>
+            <div class="card-sub">Who should see this?</div>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div>
+            <div class="field">
+              <label>Title</label>
+              <input class="input" placeholder="Write an essay about→" />
+            </div>
+            <div class="field">
+              <label>Maximum grade</label>
+              <input class="input" value="15" />
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12.5px;font-weight:650;color:var(--text-muted);margin-bottom:8px">Target</label>
+            <div class="checkline"><div class="checkbox on">“</div> Everyone in the class</div>
+            <div class="checkline"><div class="checkbox"></div> Group A</div>
+            <div class="checkline"><div class="checkbox"></div> Group B</div>
+            <div class="checkline" style="color:var(--text-faint);font-size:12.5px">Pick several groups to give one group different work.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:9px;margin-top:6px">
+          <button class="btn btn-primary">Post homework</button>
+          <button class="btn btn-ghost">Cancel</button>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="nav-item on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Homework</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>News</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11h4M19 9v4"/></svg>Groups</div>
+    </nav>
+  </div>
+</section>
+
+<!-- ===================== ADMIN ===================== -->
+<section class="screen" id="s-admin">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">F</div> FountHW</div>
+      <div class="nav-label">Admin</div>
+      <div class="nav-item on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18h20L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        Review<span class="nav-pill">3</span>
+      </div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11h4M19 9v4"/></svg>Users</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>Broadcasts</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Maintenance</div>
+      <div class="side-foot">
+        <div class="row" style="border:none;padding:0">
+          <div class="avatar">MS</div>
+          <div class="row-main">
+            <div class="row-title" style="font-size:13.5px">Ms. Sokolova</div>
+            <div class="row-meta">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <div class="page-title">Review accounts</div>
+          <div class="page-sub">3 accounts worth a second look. Work down the list.</div>
+        </div>
+        <div class="head-actions">
+          <span class="chip accent">Only visible to the administrator account</span>
+        </div>
+      </div>
+
+      <div class="grid grid-3" style="margin-bottom:18px">
+        <div class="stat" style="background:var(--red-soft);border-color:transparent">
+          <div class="stat-label" style="color:var(--red)">Needs a decision</div>
+          <div class="stat-value" style="color:var(--red)">1</div>
+          <div class="stat-note" style="color:var(--red);opacity:.8">impossible email domain</div>
+        </div>
+        <div class="stat" style="background:var(--amber-soft);border-color:transparent">
+          <div class="stat-label" style="color:var(--amber)">Worth checking</div>
+          <div class="stat-value" style="color:var(--amber)">1</div>
+          <div class="stat-note" style="color:var(--amber);opacity:.8">unconfirmed teacher</div>
+        </div>
+        <div class="stat" style="background:var(--blue-soft);border-color:transparent">
+          <div class="stat-label" style="color:var(--blue)">Minor</div>
+          <div class="stat-value" style="color:var(--blue)">2</div>
+          <div class="stat-note" style="color:var(--blue);opacity:.8">personal email, no group</div>
+        </div>
+      </div>
+
+      <div class="tabs" style="margin-bottom:16px">
+        <div class="tab on">All (3)</div>
+        <div class="tab">Needs a decision (1)</div>
+        <div class="tab">Worth checking (1)</div>
+        <div class="tab">Minor (2)</div>
+        <div class="tab">Cleared (5)</div>
+      </div>
+
+      <div class="grid" style="gap:12px">
+        <div class="card" style="border-left:3px solid var(--red)">
+          <div class="card-head" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div class="avatar" style="background:var(--red-soft);color:var(--red)">??</div>
+              <div>
+                <div class="card-title">eshkere14886767767.com</div>
+                <div class="card-sub">student · English Level 5 · joined today</div>
+              </div>
+            </div>
+            <div class="row-actions">
+              <button class="btn btn-ok btn-sm">Looks fine</button>
+              <button class="btn btn-danger btn-sm">Ban</button>
+            </div>
+          </div>
+          <div class="note" style="border-left-color:var(--red);background:var(--red-soft);color:var(--red)">
+            <b>Email domain cannot receive mail</b>
+            eshkere14886767767.com has no working mail server, so this address cannot exist.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--amber)">
+          <div class="card-head" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div class="avatar" style="background:var(--amber-soft);color:var(--amber)">FT</div>
+              <div>
+                <div class="card-title">fake_teacher_92</div>
+                <div class="card-sub">teacher · English Level 5 · joined today</div>
+              </div>
+            </div>
+            <div class="row-actions">
+              <button class="btn btn-ok btn-sm">Looks fine</button>
+              <button class="btn btn-danger btn-sm">Ban</button>
+            </div>
+          </div>
+          <div class="note" style="border-left-color:var(--amber);background:var(--amber-soft);color:var(--amber)">
+            <b>Teacher account</b>
+            Anyone can sign up as a teacher. Confirm this is a real teacher of yours.
+          </div>
+        </div>
+
+        <div class="card" style="border-left:3px solid var(--blue)">
+          <div class="card-head" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div class="avatar">NA</div>
+              <div>
+                <div class="card-title">Nodir Aliyev</div>
+                <div class="card-sub">student · English Level 5 · joined 3 days ago</div>
+              </div>
+            </div>
+            <div class="row-actions">
+              <button class="btn btn-ok btn-sm">Looks fine</button>
+              <button class="btn btn-danger btn-sm">Ban</button>
+            </div>
+          </div>
+          <div class="note" style="border-left-color:var(--blue);background:var(--blue-soft);color:var(--blue)">
+            <b>Personal email provider</b>
+            mail.ru is a free mailbox provider rather than a school address.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="nav-item on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18h20L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        Review<span class="nav-pill">3</span>
+      </div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11h4M19 9v4"/></svg>Users</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-3-8-8-3z"/></svg>Broadcast</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Fix</div>
+    </nav>
+  </div>
+</section>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'))
+    document.getElementById('s-' + id).classList.add('on')
+    document.querySelectorAll('.pv-btn[data-screen]').forEach(b => b.classList.remove('on'))
+    document.querySelector('.pv-btn[data-screen="' + id + '"]').classList.add('on')
+  }
+  function toggleTheme() {
+    const root = document.documentElement
+    const dark = root.getAttribute('data-theme') === 'dark'
+    root.setAttribute('data-theme', dark ? 'light' : 'dark')
+    document.getElementById('themeBtn').textContent = dark ? 'Dark' : 'Light'
+  }
+</script>
+</body>
+</html>
+

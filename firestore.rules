@@ -1,0 +1,241 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- session ----------
+    // A request can arrive with an auth context whose uid is missing. That
+    // context is not null, so checking request.auth != null is not enough:
+    // the uid has to be there as well. Without this, a rule that reads
+    // request.auth.token throws instead of simply saying no, and one request
+    // like that is enough to lock an account out of its own profile.
+    function signedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // Only ever called once signedIn() is true, which means the token is
+    // there too.
+    function isAdmin() {
+      return signedIn() && request.auth.token.email == 'ADMIN_EMAIL_PLACEHOLDER';
+    }
+
+    // ---------- profile ----------
+    // Reading a field that does not exist is an ERROR in Firestore rules,
+    // so every optional field is read through get(key, default).
+    function userPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function hasProfile() {
+      return signedIn() && exists(userPath());
+    }
+
+    function profile() {
+      return get(userPath()).data;
+    }
+
+    function isBanned() {
+      return hasProfile() && profile().get('banned', false) == true;
+    }
+
+    function isTeacher() {
+      return hasProfile() && profile().get('role', '') == 'teacher';
+    }
+
+    // ---------- class membership ----------
+    // The class document is the source of truth for who owns the class,
+    // so one teacher can own more than one class.
+    function classDoc(classId) {
+      return get(/databases/$(database)/documents/classes/$(classId)).data;
+    }
+
+    function isClassTeacher(classId) {
+      return signedIn()
+        && classId != null
+        && classId != ''
+        && exists(/databases/$(database)/documents/classes/$(classId))
+        && classDoc(classId).get('teacherId', '') == request.auth.uid;
+    }
+
+    function isClassMember(classId) {
+      return hasProfile() && profile().get('classId', '') == classId;
+    }
+
+    function classGroups(classId) {
+      return classId == null ? null : classDoc(classId).get('groups', null);
+    }
+
+    // ---------- group targeting ----------
+    // groupIds holds the ids of the groups the item is for.
+    // '*' means "everyone in the class".
+    function targetIds(doc) {
+      return doc.get('groupIds', null);
+    }
+
+    function inTargetGroups(doc) {
+      return targetIds(doc) == null
+        || targetIds(doc).size() == 0
+        || targetIds(doc).hasAny(['*'])
+        || (hasProfile() && targetIds(doc).hasAny([profile().get('groupId', null)]));
+    }
+
+    // Every targeted group must actually exist in the class.
+    function targetsRealGroups(doc) {
+      return targetIds(doc) == null
+        || targetIds(doc).size() == 0
+        || targetIds(doc).hasAny(['*'])
+        || (classGroups(doc.get('classId', null)) != null
+            && classGroups(doc.get('classId', null)).keys().hasAll(targetIds(doc)));
+    }
+
+    function canAccessClassContent(doc) {
+      return isAdmin()
+        || (signedIn()
+            && !isBanned()
+            && (isClassTeacher(doc.get('classId', null))
+                || (isClassMember(doc.get('classId', null))
+                    && (isTeacher() || inTargetGroups(doc)))));
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin()
+        || (signedIn() && request.auth.uid == uid)
+        || (resource != null
+            && signedIn()
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null)));
+
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.get('email', '') == request.auth.token.email
+        && request.resource.data.get('role', '') in ['student', 'teacher']
+        && request.resource.data.get('banned', false) == false
+        && request.resource.data.get('groupId', null) == null;
+
+      // Three ways to update a profile:
+      //   1. an admin may change anything
+      //   2. a teacher may move a student between groups of a class they own
+      //   3. anyone may change their OWN username
+      // Every other field must be identical to what is already stored.
+      allow update: if (isAdmin()
+          // An admin can change everything except their own banned flag.
+          // Banning yourself would lock the only admin out with no way back.
+          && !(request.auth.uid == uid
+              && request.resource.data.get('banned', false) == true))
+        || (resource != null
+            && signedIn()
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null))
+            && request.resource.data.get('role', '') == resource.data.get('role', '')
+            && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+            && request.resource.data.get('email', '') == resource.data.get('email', '')
+            && request.resource.data.get('classId', '') == resource.data.get('classId', '')
+            && request.resource.data.get('classPin', '') == resource.data.get('classPin', '')
+            && request.resource.data.get('emailDomain', '') == resource.data.get('emailDomain', '')
+            && request.resource.data.get('domainVerified', false) == resource.data.get('domainVerified', false)
+            && request.resource.data.get('recoveryCode', '') == resource.data.get('recoveryCode', '')
+            && request.resource.data.get('createdAt', '') == resource.data.get('createdAt', '')
+            && (request.resource.data.get('groupId', null) == null
+                || classGroups(resource.data.get('classId', null)) == null
+                || classGroups(resource.data.get('classId', null)).keys()
+                     .hasAny([request.resource.data.get('groupId', '')])))
+        || (resource != null
+            && signedIn()
+            && request.auth.uid == uid
+            && request.resource.data.get('role', '') == resource.data.get('role', '')
+            && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+            && request.resource.data.get('email', '') == resource.data.get('email', '')
+            && request.resource.data.get('classId', '') == resource.data.get('classId', '')
+            && request.resource.data.get('classPin', '') == resource.data.get('classPin', '')
+            && request.resource.data.get('emailDomain', '') == resource.data.get('emailDomain', '')
+            && request.resource.data.get('domainVerified', false) == resource.data.get('domainVerified', false)
+            && request.resource.data.get('groupId', '') == resource.data.get('groupId', '')
+            && request.resource.data.get('createdAt', '') == resource.data.get('createdAt', ''));
+
+      allow delete: if isAdmin();
+    }
+
+    match /classes/{classId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && !isBanned()
+        && request.resource.data.get('teacherId', '') == request.auth.uid;
+
+      allow update, delete: if isAdmin() || (isClassTeacher(classId) && !isBanned());
+    }
+
+    match /homework/{hwId} {
+      allow read: if resource == null || canAccessClassContent(resource.data);
+
+      allow create: if isTeacher()
+        && !isBanned()
+        && isClassTeacher(request.resource.data.get('classId', null))
+        && targetsRealGroups(request.resource.data);
+
+      allow update, delete: if isAdmin()
+        || (resource != null
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null)));
+    }
+
+    match /announcements/{annId} {
+      allow read: if resource == null || canAccessClassContent(resource.data);
+
+      allow create: if isTeacher()
+        && !isBanned()
+        && isClassTeacher(request.resource.data.get('classId', null))
+        && targetsRealGroups(request.resource.data);
+
+      allow update, delete: if isAdmin()
+        || (resource != null
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null)));
+    }
+
+    match /submissions/{subId} {
+      allow read: if resource == null || canAccessClassContent(resource.data);
+
+      // A student may only submit for homework they can actually see, and
+      // it arrives as the plain "done" status the mark-as-done tap writes.
+      // A graded status can only ever get on a submission from a teacher's
+      // update — never from the person being graded.
+      allow create: if signedIn()
+        && !isBanned()
+        && isClassMember(request.resource.data.get('classId', null))
+        && request.resource.data.get('studentId', '') == request.auth.uid
+        && request.resource.data.get('status', '') == 'done'
+        && request.resource.data.get('grade', null) == null
+        && request.resource.data.get('homeworkId', '') != ''
+        && exists(/databases/$(database)/documents/homework/$(request.resource.data.get('homeworkId', '')))
+        && get(/databases/$(database)/documents/homework/$(request.resource.data.get('homeworkId', '')))
+             .data.get('classId', '') == request.resource.data.get('classId', '')
+        && canAccessClassContent(
+             get(/databases/$(database)/documents/homework/$(request.resource.data.get('homeworkId', ''))).data);
+
+      allow update: if isAdmin()
+        || (resource != null
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null)));
+
+      allow delete: if isAdmin()
+        || (resource != null
+            && isTeacher()
+            && !isBanned()
+            && isClassTeacher(resource.data.get('classId', null)))
+        || (resource != null
+            && signedIn()
+            && request.auth.uid == resource.data.get('studentId', ''));
+    }
+
+    match /systemNotifications/{noteId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
