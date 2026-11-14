@@ -7,6 +7,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import Auth from './components/Auth'
 import TeacherDashboard from './components/TeacherDashboard'
 import StudentDashboard from './components/StudentDashboard'
+import ParentDashboard from './components/ParentDashboard'
 import Banned from './components/Banned'
 import AccountInactive from './components/AccountInactive'
 import { resolveView, mergeProfile } from './appState'
@@ -88,6 +89,10 @@ export default function App() {
 
   if (profile.role === 'teacher') {
     return <TeacherDashboard userData={profile} />
+  }
+
+  if (profile.role === 'parent') {
+    return <ParentDashboard userData={profile} />
   }
 
   return <StudentDashboard userData={profile} />

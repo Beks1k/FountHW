@@ -167,7 +167,7 @@ export default function Profile({ userData, className }) {
                 <label>Role</label>
                 <input
                   className="input"
-                  value={userData.role === 'teacher' ? 'Teacher' : 'Student'}
+                  value={userData.role === 'teacher' ? 'Teacher' : userData.role === 'parent' ? 'Parent' : 'Student'}
                   readOnly
                 />
               </div>

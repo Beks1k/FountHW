@@ -65,6 +65,26 @@ service cloud.firestore {
       return classId == null ? null : classDoc(classId).get('groups', null);
     }
 
+    // ---------- parents ----------
+    // parentChildren/{parentUid_studentId} proves a parent linked a child
+    // with the child's PIN and username. parentClasses/{parentUid_classId}
+    // lets that parent read the class homework and announcements.
+    function isParentOfStudent(studentId) {
+      return signedIn()
+        && !isBanned()
+        && studentId != null
+        && studentId != ''
+        && exists(/databases/$(database)/documents/parentChildren/$(request.auth.uid + '_' + studentId));
+    }
+
+    function isParentOfClass(classId) {
+      return signedIn()
+        && !isBanned()
+        && classId != null
+        && classId != ''
+        && exists(/databases/$(database)/documents/parentClasses/$(request.auth.uid + '_' + classId));
+    }
+
     // ---------- group targeting ----------
     // groupIds holds the ids of the groups the item is for.
     // '*' means "everyone in the class".
@@ -104,12 +124,13 @@ service cloud.firestore {
             && signedIn()
             && isTeacher()
             && !isBanned()
-            && isClassTeacher(resource.data.get('classId', null)));
+            && isClassTeacher(resource.data.get('classId', null)))
+        || isParentOfStudent(uid);
 
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.get('email', '') == request.auth.token.email
-        && request.resource.data.get('role', '') in ['student', 'teacher']
+        && request.resource.data.get('role', '') in ['student', 'teacher', 'parent']
         && request.resource.data.get('banned', false) == false
         && request.resource.data.get('groupId', null) == null;
 
@@ -168,7 +189,9 @@ service cloud.firestore {
     }
 
     match /homework/{hwId} {
-      allow read: if resource == null || canAccessClassContent(resource.data);
+      allow read: if resource == null
+        || canAccessClassContent(resource.data)
+        || isParentOfClass(resource.data.get('classId', null));
 
       allow create: if isTeacher()
         && !isBanned()
@@ -183,7 +206,9 @@ service cloud.firestore {
     }
 
     match /announcements/{annId} {
-      allow read: if resource == null || canAccessClassContent(resource.data);
+      allow read: if resource == null
+        || canAccessClassContent(resource.data)
+        || isParentOfClass(resource.data.get('classId', null));
 
       allow create: if isTeacher()
         && !isBanned()
@@ -198,7 +223,9 @@ service cloud.firestore {
     }
 
     match /submissions/{subId} {
-      allow read: if resource == null || canAccessClassContent(resource.data);
+      allow read: if resource == null
+        || canAccessClassContent(resource.data)
+        || isParentOfStudent(resource.data.get('studentId', ''));
 
       // A student may only submit for homework they can actually see, and
       // it arrives as the plain "done" status the mark-as-done tap writes.
@@ -231,6 +258,62 @@ service cloud.firestore {
         || (resource != null
             && signedIn()
             && request.auth.uid == resource.data.get('studentId', ''));
+    }
+
+    // ---------- parent PINs ----------
+    // The document id IS the PIN. A signed-in user can fetch a PIN they know
+    // but nobody can list them. Creating on an id that already exists counts
+    // as an update, which is denied, so every PIN is unique.
+    match /parentLinks/{pin} {
+      allow get: if signedIn();
+
+      allow create: if signedIn()
+        && hasProfile()
+        && pin.matches('[0-9]{6}')
+        && profile().get('role', '') == 'student'
+        && profile().get('classId', '') != ''
+        && request.resource.data.get('studentId', '') == request.auth.uid
+        && request.resource.data.get('classId', '') == profile().get('classId', '');
+
+      allow delete: if isAdmin();
+    }
+
+    // A parent links a child only with a real PIN AND the child's username.
+    match /parentChildren/{linkId} {
+      allow read: if signedIn()
+        && (resource == null
+            || resource.data.get('parentId', '') == request.auth.uid
+            || isAdmin());
+
+      allow create, update: if signedIn()
+        && request.resource.data.get('parentId', '') == request.auth.uid
+        && linkId == request.auth.uid + '_' + request.resource.data.get('studentId', '')
+        && exists(/databases/$(database)/documents/parentLinks/$(request.resource.data.get('pin', '')))
+        && get(/databases/$(database)/documents/parentLinks/$(request.resource.data.get('pin', '')))
+             .data.get('studentId', '') == request.resource.data.get('studentId', '')
+        && get(/databases/$(database)/documents/parentLinks/$(request.resource.data.get('pin', '')))
+             .data.get('classId', '') == request.resource.data.get('classId', '')
+        && get(/databases/$(database)/documents/users/$(request.resource.data.get('studentId', '')))
+             .data.get('username', '').lower()
+             == request.resource.data.get('studentUsername', '').lower();
+
+      allow delete: if isAdmin();
+    }
+
+    match /parentClasses/{accessId} {
+      allow read: if signedIn()
+        && (resource == null
+            || resource.data.get('parentId', '') == request.auth.uid
+            || isAdmin());
+
+      allow create, update: if signedIn()
+        && request.resource.data.get('parentId', '') == request.auth.uid
+        && accessId == request.auth.uid + '_' + request.resource.data.get('classId', '')
+        && exists(/databases/$(database)/documents/parentChildren/$(request.auth.uid + '_' + request.resource.data.get('studentId', '')))
+        && get(/databases/$(database)/documents/parentChildren/$(request.auth.uid + '_' + request.resource.data.get('studentId', '')))
+             .data.get('classId', '') == request.resource.data.get('classId', '');
+
+      allow delete: if isAdmin();
     }
 
     match /systemNotifications/{noteId} {

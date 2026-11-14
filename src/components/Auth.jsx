@@ -3,6 +3,7 @@ import { auth, db } from '../firebase'
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   deleteUser,
 } from 'firebase/auth'
 import {
@@ -14,6 +15,7 @@ import {
   getDocs,
 } from 'firebase/firestore'
 import { checkEmailDomain } from '../utils/domain'
+import { linkChild, linkErrorMessage } from '../utils/parentLink'
 import PasswordInput from './PasswordInput'
 import ThemeToggle from './ThemeToggle'
 
@@ -25,8 +27,12 @@ export default function Auth() {
   const [username, setUsername] = useState('')
   const [classPin, setClassPin] = useState('')
   const [className, setClassName] = useState('')
+  const [childPin, setChildPin] = useState('')
+  const [childName, setChildName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetMode, setResetMode] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -47,6 +53,26 @@ export default function Auth() {
     }
   }
 
+  const handleReset = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await sendPasswordResetEmail(auth, email.trim())
+      setResetSent(true)
+    } catch (err) {
+      setError(
+        err.code === 'auth/invalid-email'
+          ? 'That email address looks invalid.'
+          : err.code === 'auth/too-many-requests'
+          ? 'Too many attempts. Try again in a few minutes.'
+          : 'Could not send the email. Check your connection and try again.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
@@ -54,6 +80,11 @@ export default function Auth() {
 
     if (role === 'student' && classPin.length !== 6) {
       setError('Class PIN must be 6 digits')
+      setLoading(false)
+      return
+    }
+    if (role === 'parent' && childPin.length !== 6) {
+      setError('Your child’s parent PIN must be 6 digits')
       setLoading(false)
       return
     }
@@ -84,11 +115,14 @@ export default function Auth() {
       }
 
       const uid = cred.user.uid
-      let classId
+      let classId = null
       let teacherPin = null
 
       try {
-        if (role === 'teacher') {
+        if (role === 'parent') {
+          // Verifies the PIN and the child's username before the account is kept.
+          await linkChild(db, uid, childPin, childName)
+        } else if (role === 'teacher') {
           const pin = Math.floor(100000 + Math.random() * 900000).toString()
           const classRef = doc(collection(db, 'classes'))
           await setDoc(classRef, {
@@ -112,7 +146,7 @@ export default function Auth() {
         }
 
         await setDoc(doc(db, 'users', uid), {
-          username,
+          username: username.trim(),
           email,
           role,
           classId,
@@ -123,12 +157,16 @@ export default function Auth() {
           groupId: null,
           createdAt: new Date().toISOString(),
         })
+
       } catch (err) {
         // The account exists in Auth but has no working profile in Firestore.
         // Leaving it behind would bake it in as a phantom user, so remove it
         // and ask the person to try again.
         await deleteUser(cred.user).catch(() => {})
-        if (err.message !== 'handled') {
+        const linkMessage = linkErrorMessage(err)
+        if (linkMessage) {
+          setError(linkMessage)
+        } else if (err.message !== 'handled') {
           setError('Could not finish creating your account. Try again.')
         }
         return
@@ -146,20 +184,31 @@ export default function Auth() {
           <span>FountHW</span>
         </div>
 
-        <div className="segment">
-          <button
-            className={role === 'student' ? 'on' : ''}
-            onClick={() => setRole('student')}
+        {!resetMode && (
+          <div
+            className="segment"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}
           >
-            Student
-          </button>
-          <button
-            className={role === 'teacher' ? 'on' : ''}
-            onClick={() => setRole('teacher')}
-          >
-            Teacher
-          </button>
-        </div>
+            <button
+              className={role === 'student' ? 'on' : ''}
+              onClick={() => setRole('student')}
+            >
+              Student
+            </button>
+            <button
+              className={role === 'teacher' ? 'on' : ''}
+              onClick={() => setRole('teacher')}
+            >
+              Teacher
+            </button>
+            <button
+              className={role === 'parent' ? 'on' : ''}
+              onClick={() => setRole('parent')}
+            >
+              Parent
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="note error" style={{ marginBottom: 16 }}>
@@ -167,13 +216,49 @@ export default function Auth() {
           </div>
         )}
 
-        <div className="note warn" style={{ marginBottom: 16 }}>
-          <b>Beta version</b>
-          There is no way to recover a lost password yet. Write your password
-          down and keep it somewhere safe.
-        </div>
-
-        {isLogin ? (
+        {resetMode ? (
+          <form onSubmit={handleReset}>
+            {resetSent ? (
+              <div className="note" style={{ marginBottom: 16 }}>
+                If an account exists for {email}, a reset link is on its way.
+                Check your inbox and spam folder.
+              </div>
+            ) : (
+              <>
+                <div className="field">
+                  <label>Email</label>
+                  <input
+                    className="input"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: '100%' }}
+                  disabled={loading}
+                >
+                  {loading ? 'Sending...' : 'Send reset link'}
+                </button>
+              </>
+            )}
+            <div className="auth-foot">
+              <b
+                onClick={() => {
+                  setResetMode(false)
+                  setResetSent(false)
+                  setError('')
+                }}
+              >
+                Back to sign in
+              </b>
+            </div>
+          </form>
+        ) : isLogin ? (
           <form onSubmit={handleLogin}>
             <div className="field">
               <label>Email</label>
@@ -195,6 +280,19 @@ export default function Auth() {
                 required
               />
             </div>
+            <div style={{ textAlign: 'right', marginBottom: 14 }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setResetMode(true)
+                  setResetSent(false)
+                  setError('')
+                }}
+              >
+                Forgot password?
+              </button>
+            </div>
             <button
               type="submit"
               className="btn btn-primary"
@@ -212,7 +310,7 @@ export default function Auth() {
         ) : (
           <form onSubmit={handleRegister}>
             <div className="field">
-              <label>Username</label>
+              <label>{role === 'parent' ? 'Your name' : 'Username'}</label>
               <input
                 className="input"
                 type="text"
@@ -255,7 +353,7 @@ export default function Auth() {
                   required
                 />
               </div>
-            ) : (
+            ) : role === 'teacher' ? (
               <div className="field">
                 <label>Class name</label>
                 <input
@@ -267,6 +365,31 @@ export default function Auth() {
                   required
                 />
               </div>
+            ) : (
+              <>
+                <div className="field">
+                  <label>Child’s parent PIN (6 digits)</label>
+                  <input
+                    className="input"
+                    type="text"
+                    inputMode="numeric"
+                    value={childPin}
+                    onChange={(e) => setChildPin(e.target.value.replace(/\D/g, ''))}
+                    maxLength={6}
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label>Child’s username</label>
+                  <input
+                    className="input"
+                    type="text"
+                    value={childName}
+                    onChange={(e) => setChildName(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
             )}
             <button
               type="submit"

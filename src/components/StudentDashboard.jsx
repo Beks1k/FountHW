@@ -12,6 +12,7 @@ import SystemBanner from './SystemBanner'
 import Profile from './Profile'
 import { useToast } from './FeedbackProvider'
 import AppShell from './AppShell'
+import ParentPinCard from './ParentPinCard'
 
 export default function StudentDashboard({ userData }) {
   const toast = useToast()
@@ -354,7 +355,10 @@ export default function StudentDashboard({ userData }) {
       )}
 
       {tab === 'profile' && (
+      <>
+        <ParentPinCard userData={userData} />
         <Profile userData={userData} className={classInfo.name} />
+      </>
       )}
 
       {tab === 'grades' && (

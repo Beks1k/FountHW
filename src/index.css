@@ -1,3 +1,27 @@
+  * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  touch-action: manipulation;
+}
+
+button:focus,
+button:focus-visible,
+.btn:focus,
+.row:focus,
+.tab:focus {
+  outline: none;
+}
+
+button,
+.btn,
+.row,
+.tab,
+.chip {
+  -webkit-user-select: none;
+  user-select: none;
+}
 
   :root {
     --bg: #f6f7f9;
