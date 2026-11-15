@@ -8,9 +8,11 @@ import Auth from './components/Auth'
 import TeacherDashboard from './components/TeacherDashboard'
 import StudentDashboard from './components/StudentDashboard'
 import ParentDashboard from './components/ParentDashboard'
+import Maintenance from './components/Maintenance'
 import Banned from './components/Banned'
 import AccountInactive from './components/AccountInactive'
 import { resolveView, mergeProfile } from './appState'
+import { ADMIN_EMAIL } from './config'
 
 function Loading() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
   const [serverData, setServerData] = useState(null)
   const [hasProfile, setHasProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [maintenance, setMaintenance] = useState({ uid: null, data: null })
 
   useEffect(() => {
     let unsubDoc = null
@@ -72,6 +75,17 @@ export default function App() {
     }
   }, [])
 
+  // Maintenance switch. If it cannot be read, the app stays open.
+  useEffect(() => {
+    const uid = user?.uid
+    if (!uid) return
+    return onSnapshot(
+      doc(db, 'appConfig', 'maintenance'),
+      (snap) => setMaintenance({ uid, data: snap.exists() ? snap.data() : null }),
+      () => setMaintenance({ uid, data: null })
+    )
+  }, [user?.uid])
+
   const view = resolveView({
     user,
     userData,
@@ -85,7 +99,14 @@ export default function App() {
   if (view === 'inactive') return <AccountInactive />
   if (view === 'loading') return <Loading />
 
+  // Wait for the maintenance state so the app does not flash before the block.
+  if (maintenance.uid !== user?.uid) return <Loading />
+
   const profile = mergeProfile(userData, serverData)
+
+  if (maintenance.data?.enabled === true && profile.email !== ADMIN_EMAIL) {
+    return <Maintenance reason={maintenance.data.reason} />
+  }
 
   if (profile.role === 'teacher') {
     return <TeacherDashboard userData={profile} />

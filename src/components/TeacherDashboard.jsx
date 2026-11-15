@@ -19,6 +19,7 @@ import { copyToClipboard } from '../utils/clipboard'
 import { useToast, useConfirm } from './FeedbackProvider'
 import AppShell from './AppShell'
 import { ADMIN_EMAIL } from '../config'
+import MaintenanceCard from './MaintenanceCard'
 
 const AdminPanel = lazy(() => import('./AdminPanel'))
 
@@ -512,9 +513,12 @@ export default function TeacherDashboard({ userData }) {
       )}
 
       {tab === 'admin' && isAdmin && (
-        <Suspense fallback={<div className="card"><div className="empty">Loading admin tools...</div></div>}>
-          <AdminPanel userData={userData} />
-        </Suspense>
+        <>
+          <MaintenanceCard userData={userData} />
+          <Suspense fallback={<div className="card"><div className="empty">Loading admin tools...</div></div>}>
+            <AdminPanel userData={userData} />
+          </Suspense>
+        </>
       )}
 
       {tab === 'profile' && (

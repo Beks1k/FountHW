@@ -315,6 +315,11 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
     }
+    // Maintenance switch. Any signed-in user can read it, only the admin can change it.
+    match /appConfig/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
 
     match /systemNotifications/{noteId} {
       allow read: if signedIn();
