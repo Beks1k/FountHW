@@ -9,11 +9,6 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 800,
-    rollupOptions: {
-      input: {
-        main: 'index.html',
-        reset: 'reset.html',
-      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
@@ -23,4 +18,4 @@ export default defineConfig({
       },
     },
   },
-})
+)
