@@ -12,7 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        reset: 'public/reset.html',
+        reset: 'reset.html',
       },
       output: {
         manualChunks(id) {
